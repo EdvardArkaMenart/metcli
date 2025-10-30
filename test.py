@@ -1,13 +1,18 @@
 import urllib3
 import json
 
+temps = list(())
 api_endpoint = "https://api.met.no/weatherapi/locationforecast/2.0/"
 query = "compact?lat=59.91&lon=10.75"
 
 resp = urllib3.request("GET", api_endpoint + query)
-#print(resp.status)
-#print(resp.data)
 json_data = json.loads(resp.data.decode("utf-8"))
-#print(json.dumps(json_data, indent=2))
-x = json_data.get("geometry")
-print(x)
+timeseries = json_data.get("properties").get("timeseries")
+
+for t in timeseries:
+    mtime = t["time"]
+    mtemp = t["data"].get("instant").get("details").get("air_temperature")
+    d = dict(time = mtime, temp = mtemp)
+    temps.append((d))
+    
+print(temps)
