@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 temps = list(())
 api_endpoint = "https://api.met.no/weatherapi/locationforecast/2.0/"
 query = "compact?lat=59.91&lon=10.75"
-x = 0
+
 today = datetime.now()
 
 resp = urllib3.request("GET", api_endpoint + query)
@@ -19,13 +19,16 @@ for t in timeseries:
     mtime = t["time"]
     mtemp = t["data"].get("instant").get("details").get("air_temperature")
     d = dict(time = mtime, temp = mtemp)
-    d["time"] = d["time"].replace("T", " KL: ")
-    d["time"] = d["time"].replace("00Z", "")
-    d["data"] = int(t["data"].get("instant").get("details").get("air_temperature"))
     temps.append((d))
 
 for h in temps:
-    print(temps[x])
-    x += 1
+    h["time"] = h["time"].replace("T", " KL: ")
+    h["time"] = h["time"].replace("00Z", "")
+    mtime = h["time"]
+    mtemp = str(h["temp"])
+    #print(h["time"], h["temp"])
+    tabel = f"{mtime, mtemp} grader"
+    print(tabel)
+    
     
 #print(temps)
