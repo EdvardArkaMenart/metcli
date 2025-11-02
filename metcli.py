@@ -1,13 +1,13 @@
 import urllib3
 import json
 import datetime
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 temps = list(())
 api_endpoint = "https://api.met.no/weatherapi/locationforecast/2.0/"
 query = "compact?lat=59.91&lon=10.75"
 
-today = datetime.now()
+today = date.today()
 
 resp = urllib3.request("GET", api_endpoint + query)
 json_data = json.loads(resp.data.decode("utf-8"))
@@ -20,6 +20,8 @@ for t in timeseries:
     mtemp = t["data"].get("instant").get("details").get("air_temperature")
     d = dict(time = mtime, temp = mtemp)
     temps.append((d))
+    date_string = tomorrow.strftime("%Y-%m-%d")
+    date_object = date.fromisoformat(date_string)
 
 for h in temps:
     h["time"] = h["time"].replace("T", " KL: ")
@@ -27,8 +29,8 @@ for h in temps:
     mtime = h["time"]
     mtemp = str(h["temp"])
     #print(h["time"], h["temp"])
-    tabel = f"{mtime, mtemp} grader"
-    print(tabel)
-    
-    
+    tabel = f"{mtime}\t {mtemp} grader"
+    #print(tabel)
+print(json.dumps(timeseries, indent=4))   
+#print(type(tomorrow)) 
 #print(temps)
