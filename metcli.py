@@ -5,6 +5,7 @@ temps = list(())
 today = date.today()
 
 tomorrow = today + timedelta(days=1)
+
 print("temperatur for i morgen den", tomorrow.strftime("%d, %m, %Y"))
 
 for t in timeseries:
@@ -15,6 +16,10 @@ for t in timeseries:
     date_string = tomorrow.strftime("%Y-%m-%d")
     date_object = date.fromisoformat(date_string)
 
+def date_filter(getd):
+    getd = checkd[0:9]
+    
+    
 for h in temps:
     h["time"] = h["time"].replace("T", " KL: ")
     h["time"] = h["time"].replace("00Z", "")
@@ -22,7 +27,6 @@ for h in temps:
     mtemp = str(h["temp"])
     #print(h["time"], h["temp"])
     tabel = f"{mtime}\t {mtemp} grader"
-    print(tabel)
+    #print(tabel)
 #print(json.dumps(timeseries, indent=4))   
-#print(type(tomorrow)) 
-#print(temps)
+
