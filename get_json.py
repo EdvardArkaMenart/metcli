@@ -1,6 +1,7 @@
 import urllib3
 import json
 
+# Hente data
 api_endpoint = "https://api.met.no/weatherapi/locationforecast/2.0/"
 query = "compact?lat=59.91&lon=10.75"
 

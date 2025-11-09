@@ -1,8 +1,17 @@
+# Hente værdata
+# Filtrere data
+# Vis datasett
+
 from datetime import timedelta, date
 from get_json import timeseries
 
 temps = list(())
 today = date.today()
+def date_filter(getd):
+    getd = mtime[0:10]
+    checkd = date_object
+    if getd == checkd:
+        return True
 
 tomorrow = today + timedelta(days=1)
 
@@ -16,20 +25,14 @@ for t in timeseries:
     date_string = tomorrow.strftime("%Y-%m-%d")
     date_object = date.fromisoformat(date_string)
 
-#def date_filter(getd):
-    #getd = mtime[0:10]
-    #checkd = date_object
-    #if getd == checkd:
-        #return True
-    
 for h in temps:
     h["time"] = h["time"].replace("T", " KL: ")
     h["time"] = h["time"].replace("00Z", "")
     mtime = h["time"]
     mtemp = str(h["temp"])
-    #ttime = map(date_filter, mtime)
-    #print(list(ttime))
+    ttime = map(date_filter, mtime)
+    print(ttime)
     #print(h["time"], h["temp"])
     tabel = f"{mtime}\t {mtemp} grader"
-    print(tabel)
+    #print(tabel)
 #print(json.dumps(timeseries, indent=4))   

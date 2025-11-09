@@ -1,0 +1,10 @@
+- type
+- geometry
+- properties
+-- meta
+-- timeseries
+--- time
+--- data
+---- instant
+----- details
+------ air_temperature
