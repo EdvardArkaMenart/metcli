@@ -31,8 +31,7 @@ for h in temps:
     mtime = h["time"]
     mtemp = str(h["temp"])
     ttime = map(date_filter, mtime)
-    print(ttime)
     #print(h["time"], h["temp"])
     tabel = f"{mtime}\t {mtemp} grader"
-    #print(tabel)
+    print(tabel)
 #print(json.dumps(timeseries, indent=4))   
