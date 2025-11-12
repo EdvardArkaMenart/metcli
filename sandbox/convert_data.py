@@ -30,8 +30,8 @@ for t in timeseries:
 
     # sammenligne dato fra måling med dato for i morgen
     if  measured_date == tomorrow:
-        measured_temperatur = t["data"].get("instant").get("details").get("air_temperature")
-        d = dict(time =  measured_time, temp = measured_temperatur)
+        measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
+        d = dict(time =  measured_time, temp = measured_temperature)
         temperatures.append((d))
 
 # skriv json data til fil    

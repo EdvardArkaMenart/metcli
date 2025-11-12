@@ -9,8 +9,8 @@ tomorrow = today + timedelta(days=1)
 
 # take user input and loop until one of the if statements are true
 while True:
-    #city_name = input("Tast in et bynavn i Norge med stor forbokstav: ")
-    city_name = "Oslo"
+    city_name = input("Tast in et bynavn i Norge med stor forbokstav: ")
+    #city_name = "Oslo"
     # open the cities file if valid city_name
     if city_name == "Oslo": 
         #check if the cities file is too old, if it is make convert_data get a new one

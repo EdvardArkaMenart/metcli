@@ -5,6 +5,10 @@
 from datetime import timedelta, date
 from get_json import timeseries
 
+cities = {
+    "bergen": (0.0, 0.0),
+    "oslo": (59.91, 10.75)
+}
 temps = list(())
 today = date.today()
 def date_filter(getd):
