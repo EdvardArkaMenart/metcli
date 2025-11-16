@@ -2,11 +2,11 @@
 
 import urllib3
 import json
-from print_data import city_name
+#from print_data import city_name
 
 api = "https://api.met.no/weatherapi/locationforecast/2.0/compact?"
 oslo = "lat=59.91&lon=10.75"
-
+city_name = "Oslo"
 #city_name = input("Tast in bynavn: ")
 
 # get forecast for a city
@@ -19,8 +19,7 @@ def city_finder(city):
 # put the cities forecast in a txt file
 if city_name == "Oslo":
     city = oslo
-    city_finder(city)
-    forecast = city_finder()
+    forecast = city_finder(city)
     with open('Oslo_forecast.txt', 'w') as file:
         file.write(forecast)
     # File automatically closes after the 'with' block

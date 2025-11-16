@@ -2,40 +2,56 @@
 # Filtrere data
 # Vis datasett
 
-from datetime import timedelta, date
-from get_json import timeseries
+# call convert_data if file is too old
 
+import json
+from datetime import timedelta, date
+from lib import get_temperatures
+
+num_chars_to_remove = 10
+today = date.today()
+tomorrow = today + timedelta(days=1)
+city_coordinates = None
 cities = {
     "bergen": (0.0, 0.0),
     "oslo": (59.91, 10.75)
 }
-temps = list(())
-today = date.today()
-def date_filter(getd):
-    getd = mtime[0:10]
-    checkd = date_object
-    if getd == checkd:
-        return True
+# main loop
+while True:
+    # take user input and loop
+    while not city_coordinates:
+        city_name = input("Tast in et bynavn i Norge med stor forbokstav: ")
+        try:
+            city_coordinates = cities[city_name.lower()]
+        except KeyError:
+            print("Kan ikke finne en by med navnet:", city_name)    
 
-tomorrow = today + timedelta(days=1)
+    temperatures = get_temperatures(city_name)
+    print(temperatures)
+    break
+    #print_temperatures(temperatures)
 
-print("temperatur for i morgen den", tomorrow.strftime("%d, %m, %Y"))
 
-for t in timeseries:
-    mtime = t["time"]
-    mtemp = t["data"].get("instant").get("details").get("air_temperature")
-    d = dict(time = mtime, temp = mtemp)
-    temps.append((d))
-    date_string = tomorrow.strftime("%Y-%m-%d")
-    date_object = date.fromisoformat(date_string)
 
-for h in temps:
-    h["time"] = h["time"].replace("T", " KL: ")
-    h["time"] = h["time"].replace("00Z", "")
-    mtime = h["time"]
-    mtemp = str(h["temp"])
-    ttime = map(date_filter, mtime)
-    #print(h["time"], h["temp"])
-    tabel = f"{mtime}\t {mtemp} grader"
-    print(tabel)
-#print(json.dumps(timeseries, indent=4))   
+
+
+
+
+    with open('filtered_data_oslo.json', 'r') as file:
+                forecast_tomorrow = file.read()
+
+    print("temperatur for", city_name, tomorrow.strftime("%d, %m, %Y"))
+    data = json.loads(forecast_tomorrow)
+
+    # filtrerer dataen og viser den i en tabel
+    for f in data:
+        f["time"] = f["time"].replace("T", " KL: ")
+        f["time"] = f["time"].replace("00Z", "")
+    
+        # Using string slicing
+        time_for_display = f["time"][num_chars_to_remove:]
+        # converting measured_temp from float to string
+        measured_temp = str(f["temp"])
+        # using f str to set up the output
+        tabel = f"{time_for_display}\t {measured_temp} grader"
+        print(tabel)   
