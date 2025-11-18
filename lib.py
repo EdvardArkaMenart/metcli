@@ -1,6 +1,11 @@
 import json
 from datetime import timedelta, date
 
+cities = {
+    "bergen": (0.0, 0.0),
+    "oslo": (59.91, 10.75)
+}
+
 def filter_temperatures(forecast_data): 
     temperatures = []
     # henter timeseries array
@@ -31,13 +36,22 @@ def get_cached_data(city_name):
         d = file.read()
     return(d)
 
+def get_coordinates(city_name):
+    try:
+        city_coordinates = cities[city_name]
+    except KeyError:
+        print("Kan ikke finne en by med navnet:", city_name)
+        return(False)
+    return(city_coordinates)
+    
+
 def get_forecast(city_name):
     #Utfør HTTP request, returner forecast_data
-    file_coordinates = f"coordinates\\coords.txt"
-    with open(file_coordinates, 'r') as file:
-        c = file.read()
-        city_coordinates = json.loads(file_coordinates).get(city_name)
-    print(city_coordinates)
+    file_name = f"coordinates\\coords.txt"
+    with open(file_name, 'r') as file:
+        content = file.read()
+        city_coordinates = json.loads(content).get(city_name)
+    #print(city_coordinates)
 
 def get_temperatures(city_name): 
     #Valider cache, last ned nye data hvis cache er invalid
@@ -45,7 +59,7 @@ def get_temperatures(city_name):
         forecast_data = get_cached_data(city_name)
     else:
         forecast_data = get_forecast(city_name)
-    #return(filter_temperatures(forecast_data))
+    return(filter_temperatures(forecast_data))
 
 def met_api_get(url):
     #Utfør http request
@@ -68,4 +82,4 @@ def print_temperatures(temperatures : dict):
 
 def validate_cache(city_name): 
     #Sjekk timestamp på fil mot dagens dato
-    return(False)
+    return(True)

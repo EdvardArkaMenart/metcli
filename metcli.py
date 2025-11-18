@@ -6,31 +6,28 @@
 
 import json
 from datetime import timedelta, date
-from lib import get_temperatures, print_temperatures
+from lib import get_temperatures, print_temperatures, get_coordinates
 
 num_chars_to_remove = 10
 today = date.today()
 tomorrow = today + timedelta(days=1)
-city_coordinates = None
-cities = {
-    "bergen": (0.0, 0.0),
-    "oslo": (59.91, 10.75)
-}
+city_name = None
+
 # main loop
 while True:
-    # take user input and loop
-    while not city_coordinates:
-        city_name = input("Tast in et bynavn i Norge: ")
-        try:
-            city_coordinates = cities[city_name.lower()]
-            #print(city_coordinates)
-        except KeyError:
-            print("Kan ikke finne en by med navnet:", city_name)    
 
-    temperatures = get_temperatures(city_name)
-    #print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
-    #print_temperatures(temperatures)
-    break
+    
+    i = input("Tast in et bynavn i Norge: ")
+    city_name = i.lower()
+    # finn koordinater for by
+    coordinates = get_coordinates(city_name)  
+    # sjekk om man har gyldig koordinater
+    if coordinates:
+        temperatures = get_temperatures(city_name)
+        print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
+        print_temperatures(temperatures)
+    
+    
 
 
 
