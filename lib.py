@@ -6,7 +6,8 @@ def filter_temperatures(forecast_data):
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
-    tomorrow = date.today() + timedelta(days=1)
+    #tomorrow = date.today() + timedelta(days=1)
+    tomorrow = date(2025, 11, 17)
 
     #Filtrerer timeseries, return nice dict
     for t in timeseries:
@@ -25,14 +26,18 @@ def filter_temperatures(forecast_data):
 
 def get_cached_data(city_name):
     # leser json data fra fil 
-    file_cache = f"d:\\dev\\metcli\\cache\\{city_name}.json"
+    file_cache = f"cache\\{city_name}.json"
     with open(file_cache, 'r') as file:
         d = file.read()
     return(d)
 
-def get_forecast(city_coordinates):
+def get_forecast(city_name):
     #Utfør HTTP request, returner forecast_data
-    pass
+    file_coordinates = f"coordinates\\coords.txt"
+    with open(file_coordinates, 'r') as file:
+        c = file.read()
+        city_coordinates = json.loads(file_coordinates).get(city_name)
+    print(city_coordinates)
 
 def get_temperatures(city_name): 
     #Valider cache, last ned nye data hvis cache er invalid
@@ -40,17 +45,27 @@ def get_temperatures(city_name):
         forecast_data = get_cached_data(city_name)
     else:
         forecast_data = get_forecast(city_name)
-    return(filter_temperatures(forecast_data))
+    #return(filter_temperatures(forecast_data))
 
 def met_api_get(url):
     #Utfør http request
     pass
 
-def print_temperatures(temps : dict): 
+def print_temperatures(temperatures : dict): 
     #Print nice dict
-    pass
+    for f in temperatures:
+        f["time"] = f["time"].replace("T", " KL: ")
+        f["time"] = f["time"].replace("00Z", "")
+        width = 10
+        num_chars_to_remove = 10
+        # Using string slicing
+        time_for_display = f["time"][num_chars_to_remove:]
+        # converting measured_temp from float to string
+        measured_temp = str(f["temp"])
+        # using f str to set up the output
+        tabel = f"{time_for_display} {measured_temp.rjust(width)} grader"
+        print(tabel)
 
 def validate_cache(city_name): 
     #Sjekk timestamp på fil mot dagens dato
-    return(True)
-
+    return(False)

@@ -11,7 +11,7 @@ city_name = "Oslo"
 
 # get forecast for a city
 def city_finder(city):
-    api_response = urllib3.request("GET",api + city)
+    api_response = urllib3.request("GET", api + city)
     json_data = json.loads(api_response.data.decode("utf-8"))
     data = json.dumps(json_data)
     return data
