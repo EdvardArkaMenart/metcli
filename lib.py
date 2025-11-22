@@ -12,7 +12,7 @@ def filter_temperatures(forecast_data):
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
     #tomorrow = date.today() + timedelta(days=1)
-    tomorrow = date(2025, 11, 17)
+    tomorrow = date(2025, 11, 23)
 
     #Filtrerer timeseries, return nice dict
     for t in timeseries:
