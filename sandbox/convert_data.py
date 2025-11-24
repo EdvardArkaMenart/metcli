@@ -26,7 +26,7 @@ for t in timeseries:
     measured_time = t["time"]
     
     # extract first 10 chars
-    measured_date = date.fromisoformat( measured_time[0:10])
+    measured_date = date.fromisoformat(measured_time[0:10])
 
     # sammenligne dato fra måling med dato for i morgen
     if  measured_date == tomorrow:

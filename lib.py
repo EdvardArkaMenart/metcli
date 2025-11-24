@@ -1,4 +1,6 @@
 import json
+import urllib3
+import os
 from datetime import timedelta, date
 
 cities = {
@@ -11,10 +13,9 @@ def filter_temperatures(forecast_data):
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
-    #tomorrow = date.today() + timedelta(days=1)
-    tomorrow = date(2025, 11, 23)
+    tomorrow = date.today() + timedelta(days=1)
 
-    #Filtrerer timeseries, return nice dict
+    # Filtrerer timeseries, return nice dict
     for t in timeseries:
         # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
         measured_time = t["time"]
@@ -44,29 +45,55 @@ def get_coordinates(city_name):
         return(False)
     return(city_coordinates)
     
+def get_file_date(city_name):
+    # Get the last modification time
+    file_path = f"cache\\{city_name}.json"
+    try:
+        modification_timestamp = os.path.getmtime(file_path)
+        modified_date = date.fromtimestamp(modification_timestamp)
+        return(modified_date)
+    except FileNotFoundError:
+        pass
 
 def get_forecast(city_name):
-    #Utfør HTTP request, returner forecast_data
-    file_name = f"coordinates\\coords.txt"
-    with open(file_name, 'r') as file:
-        content = file.read()
-        city_coordinates = json.loads(content).get(city_name)
-    #print(city_coordinates)
+    # Utfør HTTP request, returner forecast_data
+    url = get_url(city_name)
+    weather_data = met_api_get(url)
+    write_city_weather_file(weather_data, city_name)
+    d = get_cached_data(city_name)
+    return(d)
+
 
 def get_temperatures(city_name): 
-    #Valider cache, last ned nye data hvis cache er invalid
+    # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
         forecast_data = get_cached_data(city_name)
+        print("worked")
     else:
         forecast_data = get_forecast(city_name)
+        print("failed")
     return(filter_temperatures(forecast_data))
 
+def get_url(city_name):
+    # Henter ut cordinatene fra cities og legger dem til i en url
+    coordinates = cities[city_name]
+    latitude = coordinates[0]
+    longitude = coordinates[1]
+    url = f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}"
+    return(url) 
+    
+
 def met_api_get(url):
-    #Utfør http request
-    pass
+    # Utfør http request
+    headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
+    api_response = urllib3.request("GET", url, headers=headers)
+    json_data = json.loads(api_response.data.decode("utf-8"))
+    data = json.dumps(json_data)
+    return(data)
+    
 
 def print_temperatures(temperatures : dict): 
-    #Print nice dict
+    # Print nice dict
     for f in temperatures:
         f["time"] = f["time"].replace("T", " KL: ")
         f["time"] = f["time"].replace("00Z", "")
@@ -81,5 +108,16 @@ def print_temperatures(temperatures : dict):
         print(tabel)
 
 def validate_cache(city_name): 
-    #Sjekk timestamp på fil mot dagens dato
-    return(True)
+    # Sjekk timestamp på fil mot dagens dato
+    file_date = get_file_date(city_name)
+    if file_date == date.today():
+        return(True)
+    else:
+        return(False)
+
+def write_city_weather_file(weather_data, city_name):
+    # write/overwrite a cities forecast file
+    file_cache = f"cache\\{city_name}.json"
+    with open(file_cache, 'w') as file:
+        file.write(weather_data)
+      
