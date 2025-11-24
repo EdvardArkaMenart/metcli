@@ -4,7 +4,7 @@ import os
 from datetime import timedelta, date
 
 cities = {
-    "bergen": (0.0, 0.0),
+    "bergen": (60.39, 5.32),
     "oslo": (59.91, 10.75)
 }
 
