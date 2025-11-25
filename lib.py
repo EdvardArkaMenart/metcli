@@ -68,10 +68,10 @@ def get_temperatures(city_name):
     # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
         forecast_data = get_cached_data(city_name)
-        print("worked")
+        print("up to date")
     else:
         forecast_data = get_forecast(city_name)
-        print("failed")
+        print("expired")
     return(filter_temperatures(forecast_data))
 
 def get_url(city_name):
