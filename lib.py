@@ -97,14 +97,13 @@ def print_temperatures(temperatures : dict):
     for f in temperatures:
         f["time"] = f["time"].replace("T", " KL: ")
         f["time"] = f["time"].replace("00Z", "")
-        width = 10
         num_chars_to_remove = 10
         # Using string slicing
         time_for_display = f["time"][num_chars_to_remove:]
         # converting measured_temp from float to string
         measured_temp = str(f["temp"])
         # using f str to set up the output
-        tabel = f"{time_for_display} {measured_temp.rjust(width)} grader"
+        tabel = f"{time_for_display} {measured_temp:>8} grader"
         print(tabel)
 
 def validate_cache(city_name): 
