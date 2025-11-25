@@ -2,8 +2,6 @@
 # Filtrere data
 # Vis datasett
 
-# call convert_data if file is too old
-
 from datetime import timedelta, date
 from lib import get_temperatures, print_temperatures, get_coordinates
 
