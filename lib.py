@@ -4,9 +4,31 @@ import os
 from datetime import timedelta, date
 
 cities = {
+    "arendal": (58.46, 8.77),
     "bergen": (60.39, 5.32),
-    "oslo": (59.91, 10.75)
+    "bodø": (67.28, 14.40),
+    "drammen": (59.74, 10.20),
+    "fredrikstad/sarpsborg": (59.21, 10.94),
+    "gjøvik": (60.79, 10.69),
+    "halden": (59.13, 11.38),
+    "hamar": (60.79, 11.06),
+    "haugesund": (59.41, 5.26),
+    "kristiansand": (58.15, 8.01),
+    "larvik": (59.05, 10.02),
+    "moss": (59.42, 10.69),
+    "oslo": (59.91, 10.75),
+    "porsgrunn/skien": (59.13, 9.65),
+    "sandefjord": (59.13, 10.21),
+    "stavanger/sandnes": (58.97, 5.73),
+    "tromsø": (69.64, 18.95),
+    "trondheim": (63.43, 10.39),
+    "tønsberg": (59.26, 10.40),
+    "ålesund": (62.47, 6.14)
 }
+
+def show_cities(city_list):
+    for x, y in enumerate(city_list, start = 1):
+        print(f"{x:>3} {y.capitalize()} ")
 
 def filter_temperatures(forecast_data): 
     temperatures = []
@@ -37,6 +59,33 @@ def get_cached_data(city_name):
         d = file.read()
     return(d)
 
+def get_city_name(city_index, city_list):
+    city_name = False
+    if city_index >= 1 and city_index <= len(city_list):
+        for index, city in enumerate(city_list, start = 1):
+            if city_index == index:
+                city_name = city
+                return(city_name)
+    else:
+        # ugyldig valg
+        print("Kan ikke finne en by med tallet", str(city_index))
+        return(False)
+
+# parse input og returner int, str eller bool 
+def get_command():
+    i = input("Velg by ved å taste inn ett tall, [L] for å vise byer: ")
+    if not i:
+        return(False)
+    if i.lower() == "l":
+        return("l")
+    else:
+        try:
+            city_index = i
+            return(city_index)
+        except ValueError:
+            print("ugyldig valg du må skrive ett tall")
+            return(False)
+
 def get_coordinates(city_name):
     try:
         city_coordinates = cities[city_name]
@@ -63,7 +112,6 @@ def get_forecast(city_name):
     d = get_cached_data(city_name)
     return(d)
 
-
 def get_temperatures(city_name): 
     # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
@@ -81,7 +129,9 @@ def get_url(city_name):
     longitude = coordinates[1]
     url = f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}"
     return(url) 
-    
+
+def make_city_list():
+    return(cities.keys())       
 
 def met_api_get(url):
     # Utfør http request
@@ -91,7 +141,6 @@ def met_api_get(url):
     data = json.dumps(json_data)
     return(data)
     
-
 def print_temperatures(temperatures : dict): 
     # Print nice dict
     for f in temperatures:
