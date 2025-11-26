@@ -26,10 +26,6 @@ cities = {
     "ålesund": (62.47, 6.14)
 }
 
-def show_cities(city_list):
-    for x, y in enumerate(city_list, start = 1):
-        print(f"{x:>3} {y.capitalize()} ")
-
 def filter_temperatures(forecast_data): 
     temperatures = []
     # henter timeseries array
@@ -80,7 +76,8 @@ def get_command():
         return("l")
     else:
         try:
-            city_index = i
+            int(i)
+            city_index = str(i)
             return(city_index)
         except ValueError:
             print("ugyldig valg du må skrive ett tall")
@@ -154,6 +151,10 @@ def print_temperatures(temperatures : dict):
         # using f str to set up the output
         tabel = f"{time_for_display} {measured_temp:>8} grader"
         print(tabel)
+
+def show_cities(city_list):
+    for x, y in enumerate(city_list, start = 1):
+        print(f"{x:>3} {y.capitalize()} ")
 
 def validate_cache(city_name): 
     # Sjekk timestamp på fil mot dagens dato
