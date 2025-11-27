@@ -1,3 +1,8 @@
+# Ta med 6 dager til fra daten
+# Beholde time for time outputen for i morgen og lag en som viser 4 perioder for alle dagene
+# Rengn snittemperatur for hele dagen og timeperioden og ta det med i outputen
+# vis laveste og høyeste periode 
+
 import json
 import urllib3
 import os
@@ -26,27 +31,55 @@ cities = {
     "ålesund": (62.47, 6.14)
 }
 
-def filter_temperatures(forecast_data): 
+def filter_temperatures(forecast_data, i): 
     temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
     tomorrow = date.today() + timedelta(days=1)
 
+    
+    r = i.lower
     # Filtrerer timeseries, return nice dict
     for t in timeseries:
         # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
         measured_time = t["time"]
     
         # extract first 10 chars
-        measured_date = date.fromisoformat( measured_time[0:10])
-
-        # sammenligne dato fra måling med dato for i morgen
-        if  measured_date == tomorrow:
-            measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
-            d = dict(time =  measured_time, temp = measured_temperature)
-            temperatures.append((d))
+        measured_date = date.fromisoformat(measured_time[0:10])
+        
+        
+        if r == "t":
+            # sammenligne dato fra måling med dato for i morgen
+            if  measured_date == tomorrow:
+                measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
+                d = dict(time =  measured_time, temp = measured_temperature)
+                temperatures.append((d))
+        elif r == "w":
+            get_seven_dates(tomorrow)
+            #and 00 or 06 or 12 or 18
+            for d in seven_dates:
+                if measured_date == d :
+                    measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
+                    d = dict(time =  measured_time, temp = measured_temperature)
+                    temperatures.append((d))
     return(temperatures)
+
+def get_seven_dates(tomorrow):
+    """
+    Returns a list of all dates within a 7-day period starting from the given date.
+
+    Args:
+        start_date (date): The starting date.
+
+    Returns:
+        list: A list of date objects covering the 7-day period.
+    """
+    seven_dates = []
+    for i in range(7):
+        current_date = tomorrow + timedelta(days=i)
+        seven_dates.append(current_date)
+    return seven_dates
 
 def get_cached_data(city_name):
     # leser json data fra fil 
@@ -117,7 +150,8 @@ def get_temperatures(city_name):
     else:
         forecast_data = get_forecast(city_name)
         print("expired")
-    return(filter_temperatures(forecast_data))
+    i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
+    return(filter_temperatures(forecast_data, i))
 
 def get_url(city_name):
     # Henter ut cordinatene fra cities og legger dem til i en url
