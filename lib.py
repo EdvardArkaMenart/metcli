@@ -31,15 +31,16 @@ cities = {
     "ålesund": (62.47, 6.14)
 }
 
-def filter_temperatures(forecast_data, i): 
+def filter_temperatures(forecast_data): 
+    time_periods = ["00", "06", "12", "18"]
     temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
     tomorrow = date.today() + timedelta(days=1)
 
-    
-    r = i.lower
+    i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
+    r = i.lower()
     # Filtrerer timeseries, return nice dict
     for t in timeseries:
         # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
@@ -47,7 +48,7 @@ def filter_temperatures(forecast_data, i):
     
         # extract first 10 chars
         measured_date = date.fromisoformat(measured_time[0:10])
-        
+        measured_hour = measured_time[11:13]
         
         if r == "t":
             # sammenligne dato fra måling med dato for i morgen
@@ -56,13 +57,14 @@ def filter_temperatures(forecast_data, i):
                 d = dict(time =  measured_time, temp = measured_temperature)
                 temperatures.append((d))
         elif r == "w":
-            get_seven_dates(tomorrow)
-            #and 00 or 06 or 12 or 18
-            for d in seven_dates:
-                if measured_date == d :
-                    measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
-                    d = dict(time =  measured_time, temp = measured_temperature)
-                    temperatures.append((d))
+            seven_dates = get_seven_dates(tomorrow)
+            # tar ut riktige time perioder
+            if (measured_date in seven_dates) and (measured_hour in time_periods):
+                max_temp = t["data"].get("instant").get("details").get("air_temperature")
+                min_temp =
+                averege =
+                d = dict(time =  measured_time, temp = measured_temperature)
+                temperatures.append((d))
     return(temperatures)
 
 def get_seven_dates(tomorrow):
@@ -150,15 +152,14 @@ def get_temperatures(city_name):
     else:
         forecast_data = get_forecast(city_name)
         print("expired")
-    i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
-    return(filter_temperatures(forecast_data, i))
+    return(forecast_data)
 
 def get_url(city_name):
     # Henter ut cordinatene fra cities og legger dem til i en url
     coordinates = cities[city_name]
     latitude = coordinates[0]
     longitude = coordinates[1]
-    url = f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}"
+    url = f"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={latitude}&lon={longitude}"
     return(url) 
 
 def make_city_list():

@@ -3,7 +3,7 @@ import urllib3
 from datetime import date, timedelta
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
-#url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667&altitude=4150"
+#url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
 #headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
 #api_response = urllib3.request("GET", url, headers=headers)
 #json_data = json.loads(api_response.data.decode("utf-8"))
