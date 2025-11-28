@@ -3,7 +3,7 @@
 # Vis datasett
 
 from datetime import timedelta, date
-from lib import get_temperatures, print_temperatures, get_coordinates, make_city_list, get_city_name, get_command, show_cities, filter_temperatures
+from lib import *
 
 today = date.today()
 tomorrow = today + timedelta(days=1)
@@ -14,7 +14,8 @@ show_cities(city_list)
 # main loop
 while True:
     # velg by  
-    command = get_command()
+    i = None
+    command = get_command(i)
     if command == "l":
         show_cities(city_list)
         continue
@@ -26,12 +27,22 @@ while True:
     if not city_name:
         continue
     # velg modus (1d/7d)
-
+    mode = False
+    while mode is False:
+        mode = get_command(command)
     # finn koordinater for by
-    coordinates = get_coordinates(city_name)  
-    # sjekk om man har gyldig koordinater
-    if coordinates:
-        temperatures = get_temperatures(city_name)
-        #
-        print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
-        print_temperatures(temperatures, mode)
+    coordinates = get_coordinates(city_name)   
+    # viser værdata for i morgen 
+    if mode == "t":
+        # sjekk om man har gyldig koordinater
+        if coordinates:
+            forecast_data = get_forecast_data(city_name)
+            temperatures = filter_temperatures1d(forecast_data)
+            print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
+            print_temperatures(temperatures, mode)
+    # viser værdata for syv dager
+    if mode == "w":
+        if coordinates:
+            forecast_data = get_forecast_data(city_name)
+            temperatures = filter_temperatures7d(forecast_data)
+            print_temperatures(temperatures, mode)

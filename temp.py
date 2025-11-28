@@ -3,11 +3,11 @@ import urllib3
 from datetime import date, timedelta
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
-#url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
-#headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
-#api_response = urllib3.request("GET", url, headers=headers)
-#json_data = json.loads(api_response.data.decode("utf-8"))
-#print(json.dumps(json_data, indent=4))
+url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
+headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
+api_response = urllib3.request("GET", url, headers=headers)
+json_data = json.loads(api_response.data.decode("utf-8"))
+print(json.dumps(json_data, indent=4))
 
 tommorow = date.today() + timedelta(days=1)
 
@@ -33,3 +33,4 @@ seven_day_period = get_dates_seven_days_from_date(tommorow)
 print(f"Dates for the 7-day period starting from {tommorow}:")
 for d in seven_day_period:
     print(d)
+

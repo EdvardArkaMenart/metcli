@@ -31,57 +31,50 @@ cities = {
     "ålesund": (62.47, 6.14)
 }
 
-def filter_temperatures(forecast_data): 
+def filter_temperatures1d(forecast_data):
+    temperatures = []
+    # henter timeseries array
+    timeseries = json.loads(forecast_data).get("properties").get("timeseries")
+    # set up datetime variables
+    tomorrow = date.today() + timedelta(days=1)
+    # Filtrerer timeseries, return nice dict
+    for t in timeseries:
+        # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
+        measured_time = t["time"]
+        # extract first 10 chars
+        measured_date = date.fromisoformat(measured_time[0:10])
+        # sammenligne dato fra måling med dato for i morgen
+        if  measured_date == tomorrow:
+            measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
+            d = dict(time =  measured_time, temp = measured_temperature)
+            temperatures.append((d))
+    return(temperatures)
+
+def filter_temperatures7d(forecast_data):
     time_periods = ["00", "06", "12", "18"]
     temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
     tomorrow = date.today() + timedelta(days=1)
-
-    i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
-    r = i.lower()
     # Filtrerer timeseries, return nice dict
     for t in timeseries:
         # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
         measured_time = t["time"]
-    
         # extract first 10 chars
         measured_date = date.fromisoformat(measured_time[0:10])
         measured_hour = measured_time[11:13]
-        
-        if r == "t":
-            # sammenligne dato fra måling med dato for i morgen
-            if  measured_date == tomorrow:
-                measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
-                d = dict(time =  measured_time, temp = measured_temperature)
-                temperatures.append((d))
-        elif r == "w":
-            seven_dates = get_seven_dates(tomorrow)
-            # tar ut riktige time perioder
-            if (measured_date in seven_dates) and (measured_hour in time_periods):
-                max_temp = t["data"].get("instant").get("details").get("air_temperature")
-                min_temp =
-                averege =
-                d = dict(time =  measured_time, temp = measured_temperature)
-                temperatures.append((d))
+        seven_dates = get_seven_dates(tomorrow)
+        # tar ut riktige time perioder
+        if (measured_date in seven_dates) and (measured_hour in time_periods):
+            maximum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_max")
+            minimum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_min")
+            a = (maximum_temp + minimum_temp) / 2
+            d = dict(time =  measured_time, max_temp = maximum_temp, min_temp = minimum_temp, averege = a)
+            temperatures.append((d))
     return(temperatures)
 
-def get_seven_dates(tomorrow):
-    """
-    Returns a list of all dates within a 7-day period starting from the given date.
 
-    Args:
-        start_date (date): The starting date.
-
-    Returns:
-        list: A list of date objects covering the 7-day period.
-    """
-    seven_dates = []
-    for i in range(7):
-        current_date = tomorrow + timedelta(days=i)
-        seven_dates.append(current_date)
-    return seven_dates
 
 def get_cached_data(city_name):
     # leser json data fra fil 
@@ -103,26 +96,39 @@ def get_city_name(city_index, city_list):
         return(False)
 
 # parse input og returner int, str eller bool 
-def get_command():
-    i = input("Velg by ved å taste inn ett tall, [L] for å vise byer: ")
+def get_command(i):
     if not i:
-        return(False)
-    if i.lower() == "l":
-        return("l")
-    else:
-        try:
-            int(i)
-            city_index = str(i)
-            return(city_index)
-        except ValueError:
-            print("ugyldig valg du må skrive ett tall")
+        i = input("Velg by ved å taste inn ett tall, [L] for å vise byer: ")
+        if not i:
             return(False)
-
+        if i.lower() == "l":
+            return("l")
+        else:
+            try:
+                int(i)
+                city_index = str(i)
+                return(city_index)
+            except ValueError:
+                print("ugyldig valg du må skrive ett tall fra listen")
+                return(False)
+    
+    if i:
+        i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
+        if not i:
+            return(False)
+        if i.lower() == "t":
+            return("t")
+        if i.lower() == "w":
+            return("w")
+        else:
+            print("Ugyldig valg bare [T] og [W] er gyldig")
+            return(False)
+        
 def get_coordinates(city_name):
     try:
         city_coordinates = cities[city_name]
     except KeyError:
-        print("Kan ikke finne en by med navnet:", city_name)
+        #print("Kan ikke finne en by med tallet:", city_name)
         return(False)
     return(city_coordinates)
     
@@ -144,7 +150,7 @@ def get_forecast(city_name):
     d = get_cached_data(city_name)
     return(d)
 
-def get_temperatures(city_name): 
+def get_forecast_data(city_name): 
     # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
         forecast_data = get_cached_data(city_name)
@@ -153,6 +159,14 @@ def get_temperatures(city_name):
         forecast_data = get_forecast(city_name)
         print("expired")
     return(forecast_data)
+
+def get_seven_dates(tomorrow):
+    # lager en liste med syv datoer
+    seven_dates = []
+    for i in range(7):
+        current_date = tomorrow + timedelta(days=i)
+        seven_dates.append(current_date)
+    return seven_dates
 
 def get_url(city_name):
     # Henter ut cordinatene fra cities og legger dem til i en url
@@ -173,19 +187,37 @@ def met_api_get(url):
     data = json.dumps(json_data)
     return(data)
     
-def print_temperatures(temperatures : dict): 
-    # Print nice dict
-    for f in temperatures:
-        f["time"] = f["time"].replace("T", " KL: ")
-        f["time"] = f["time"].replace("00Z", "")
-        num_chars_to_remove = 10
-        # Using string slicing
-        time_for_display = f["time"][num_chars_to_remove:]
-        # converting measured_temp from float to string
-        measured_temp = str(f["temp"])
-        # using f str to set up the output
-        tabel = f"{time_for_display} {measured_temp:>8} grader"
-        print(tabel)
+def print_temperatures(temperatures : dict, mode):
+    if mode == "t": 
+        # Print nice dict
+        for f in temperatures:
+            f["time"] = f["time"].replace("T", " KL: ")
+            f["time"] = f["time"].replace("00Z", "")
+            num_chars_to_remove = 10
+            # Using string slicing
+            time_for_display = f["time"][num_chars_to_remove:]
+            # converting measured_temp from float to string
+            measured_temp = str(f["temp"])
+            # using f str to set up the output
+            tabel = f"{time_for_display} {measured_temp:>8} grader"
+            print(tabel)
+    if mode == "w":
+        element = 0
+        d = 1
+        tommorow = date.today() + timedelta(days=d)
+        comp_times = get_seven_dates(tommorow)
+        comp_time = comp_times[element]
+        for f in temperatures:
+            measured_time = f["time"]
+            measured_date = date.fromisoformat(measured_time[0:10])
+            element += 1
+            print(element)
+            if measured_date == comp_time:
+                print(tommorow)
+                print("")
+                
+                d += 1
+        print(d)
 
 def show_cities(city_list):
     for x, y in enumerate(city_list, start = 1):
