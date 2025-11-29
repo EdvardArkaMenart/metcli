@@ -74,7 +74,23 @@ def filter_temperatures7d(forecast_data):
             temperatures.append((d))
     return(temperatures)
 
-
+def prep_data(forecast_data):
+    time_periods = ["00", "06", "12", "18"]
+    temperatures = []
+    timeseries = json.loads(forecast_data).get("properties").get("timeseries")
+    # loop over dager
+    for d in range(7):
+        periodic_measurements = []
+        print("dag: ", d)
+        day = dict()
+        # loop over perioder
+        for p in time_periods:
+            period = dict(time =  measured_time, max_temp = maximum_temp, min_temp = minimum_temp, averege = a)
+            periodic_measurements.append(period)
+        day["date"] = current_date
+        day["periods"] = periodic_measurements
+        temperatures.append(day)
+    return(temperatures)
 
 def get_cached_data(city_name):
     # leser json data fra fil 
@@ -111,7 +127,6 @@ def get_command(i):
             except ValueError:
                 print("ugyldig valg du må skrive ett tall fra listen")
                 return(False)
-    
     if i:
         i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
         if not i:
@@ -125,11 +140,7 @@ def get_command(i):
             return(False)
         
 def get_coordinates(city_name):
-    try:
-        city_coordinates = cities[city_name]
-    except KeyError:
-        #print("Kan ikke finne en by med tallet:", city_name)
-        return(False)
+    city_coordinates = cities[city_name] 
     return(city_coordinates)
     
 def get_file_date(city_name):

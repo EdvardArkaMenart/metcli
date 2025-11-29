@@ -1,15 +1,19 @@
 import json
 import urllib3
 from datetime import date, timedelta
+from lib import prep_data, get_cached_data
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
-url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
-headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
-api_response = urllib3.request("GET", url, headers=headers)
-json_data = json.loads(api_response.data.decode("utf-8"))
-print(json.dumps(json_data, indent=4))
+#url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
+#headers = {"User-Agent": "metcli/1.0 github.com/EdvardArkaMenart/metcli"}
+#api_response = urllib3.request("GET", url, headers=headers)
+#json_data = json.loads(api_response.data.decode("utf-8"))
+#print(json.dumps(json_data, indent=4))
 
+json_data = get_cached_data("bergen")
 tommorow = date.today() + timedelta(days=1)
+test = prep_data(json_data)
+print(json.dumps(test, indent=4))
 
 def get_dates_seven_days_from_date(start_date):
     """
@@ -30,7 +34,8 @@ def get_dates_seven_days_from_date(start_date):
 # Example usage:
 seven_day_period = get_dates_seven_days_from_date(tommorow)
 
-print(f"Dates for the 7-day period starting from {tommorow}:")
-for d in seven_day_period:
-    print(d)
+#print(f"Dates for the 7-day period starting from {tommorow}:")
+#for d in seven_day_period:
+    #print(d)
+
 
