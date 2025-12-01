@@ -1,7 +1,7 @@
 import json
 import urllib3
 from datetime import date, timedelta
-from lib import prep_data, get_cached_data
+from lib import prep_data, get_cached_data, prep_data2
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
@@ -12,27 +12,18 @@ from lib import prep_data, get_cached_data
 
 json_data = get_cached_data("bergen")
 tommorow = date.today() + timedelta(days=1)
-test = prep_data(json_data)
+test = prep_data2(json_data)
 print(json.dumps(test, indent=4))
 
-def get_dates_seven_days_from_date(start_date):
-    """
-    Returns a list of all dates within a 7-day period starting from the given date.
-
-    Args:
-        start_date (date): The starting date.
-
-    Returns:
-        list: A list of date objects covering the 7-day period.
-    """
-    date_list = []
-    for i in range(7):
-        current_date = start_date + timedelta(days=i)
-        date_list.append(current_date)
-    return date_list
+#def get_dates_seven_days_from_date(start_date):
+    #date_list = []
+    #for i in range(7):
+        #current_date = start_date + timedelta(days=i)
+        #date_list.append(current_date)
+    #return date_list
 
 # Example usage:
-seven_day_period = get_dates_seven_days_from_date(tommorow)
+#seven_day_period = get_dates_seven_days_from_date(tommorow)
 
 #print(f"Dates for the 7-day period starting from {tommorow}:")
 #for d in seven_day_period:
