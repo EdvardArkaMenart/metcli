@@ -1,7 +1,7 @@
 import json
 import urllib3
 from datetime import date, timedelta
-from lib import prep_data, get_cached_data, prep_data2
+from lib import get_cached_data, prep_data3
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
@@ -12,7 +12,8 @@ from lib import prep_data, get_cached_data, prep_data2
 
 json_data = get_cached_data("bergen")
 tommorow = date.today() + timedelta(days=1)
-test = prep_data2(json_data)
+test = prep_data3(json_data)
+#test = json.loads(json_data)
 print(json.dumps(test, indent=4))
 
 #def get_dates_seven_days_from_date(start_date):

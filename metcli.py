@@ -8,7 +8,8 @@ from lib import *
 today = date.today()
 tomorrow = today + timedelta(days=1)
 city_list = make_city_list()
-
+DAY_VIEW = 1
+WEEK_VIEW = 2
 show_cities(city_list)
  
 # main loop
@@ -33,7 +34,7 @@ while True:
     # finn koordinater for by
     coordinates = get_coordinates(city_name)   
     # viser værdata for i morgen 
-    if mode == "t":
+    if mode == DAY_VIEW:
         # sjekk om man har gyldig koordinater
         if coordinates:
             forecast_data = get_forecast_data(city_name)
@@ -41,7 +42,7 @@ while True:
             print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
             print_temperatures(temperatures, mode)
     # viser værdata for syv dager
-    if mode == "w":
+    if mode == WEEK_VIEW:
         if coordinates:
             forecast_data = get_forecast_data(city_name)
             temperatures = filter_temperatures7d(forecast_data)

@@ -8,6 +8,9 @@ import urllib3
 import os
 from datetime import timedelta, date
 
+DAY_VIEW = 1
+WEEK_VIEW = 2
+
 cities = {
     "arendal": (58.46, 8.77),
     "bergen": (60.39, 5.32),
@@ -50,92 +53,37 @@ def filter_temperatures1d(forecast_data):
             temperatures.append((d))
     return(temperatures)
 
-def filter_temperatures7d(forecast_data):
+def filter_temperatures7d(forecast_data):  
+    days = {}
     time_periods = ["00", "06", "12", "18"]
-    temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
     tomorrow = date.today() + timedelta(days=1)
-    # Filtrerer timeseries, return nice dict
+    seven_dates = get_seven_dates(tomorrow)
+    # prep days
     for t in timeseries:
         # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
         measured_time = t["time"]
-        # extract first 10 chars
-        measured_date = date.fromisoformat(measured_time[0:10])
+        # extract positions 12-13
         measured_hour = measured_time[11:13]
-        seven_dates = get_seven_dates(tomorrow)
-        # tar ut riktige time perioder
-        if (measured_date in seven_dates) and (measured_hour in time_periods):
-            maximum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_max")
-            minimum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_min")
-            a = (maximum_temp + minimum_temp) / 2
-            d = dict(time =  measured_time, max_temp = maximum_temp, min_temp = minimum_temp, averege = a)
-            temperatures.append((d))
-    return(temperatures)
-
-def prep_data(forecast_data):
-    time_periods = ["00", "06", "12", "18"]
-    temperatures = []
-    tomorrow = date.today() + timedelta(days=1)
-    timeseries = json.loads(forecast_data).get("properties").get("timeseries")
-    seven_dates = get_seven_dates(tomorrow)
-    for t in timeseries:
-        # loop over dager
-        for d in range(7):
-            periodic_measurements = []
-            #print("dag: ", d)
-            day = dict()
-            # loop over perioder
-            for p in time_periods:
-                # t["time"] inneholder dette formatet: 2025-11-10T23:00:00Z
-                measured_time = t["time"]
-                # extract first 10 chars
-                measured_date = date.fromisoformat(measured_time[0:10])
-                measured_hour = measured_time[11:13]
-                if (measured_date in seven_dates) and (measured_hour in p):
-                    current_date = measured_time[0:10]
-                    maximum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_max")
-                    minimum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_min")
-                    a = f"{(maximum_temp + minimum_temp) / 2:.1f}"
-                    period = dict(time =  measured_time, max_temp = maximum_temp, min_temp = minimum_temp, averege = a)                    
-                    periodic_measurements.append(period)
-                    day["date"] = current_date
-                    day["periods"] = periodic_measurements
-                    temperatures.append(day)
-        else:
-            return(temperatures)
-            
-def prep_data2(forecast_data):
-    time_periods = ["00", "06", "12", "18"]
-    temperatures = []
-    tomorrow = date.today() + timedelta(days=1)
-    timeseries = json.loads(forecast_data).get("properties").get("timeseries")
-    seven_dates = get_seven_dates(tomorrow)
-    periodic_measurements = []
-    day = dict()
-    for t in timeseries:
-        measured_time = t["time"]
-        print(type(t["data"]))
         # extract first 10 chars
-        measured_date = date.fromisoformat(measured_time[0:10])
-        measured_hour = measured_time[11:13]
         current_date = measured_time[0:10]
-        maximum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_max")
-        minimum_temp = t["data"].get("next_6_hours").get("details").get("air_temperature_min")
-        a = f"{(maximum_temp + minimum_temp) / 2:.1f}"
-        if measured_hour in time_periods:
-            if measured_date == get_date(1):
-                period = dict(time =  measured_time, max_temp = maximum_temp, min_temp = minimum_temp, averege = a)                    
-                periodic_measurements.append(period)
-                day["date"] = current_date
-                day["periods"] = periodic_measurements
-                temperatures.append(day)
-    return(temperatures)
+        if (date.fromisoformat(current_date) in seven_dates):
+            days[current_date] = {}
 
-def get_date(d):
-    tomorrow = date.today() + timedelta(days=d)
-    return(tomorrow)
+    # build days dict
+    for d in days.keys():
+        day_periods = {}
+        for t in timeseries:
+            measured_time = t["time"]
+            current_date = measured_time[0:10]
+            measured_hour = measured_time[11:13]
+            # tar ut riktige time perioder
+            if (d == current_date) and (date.fromisoformat(current_date) in seven_dates) and (measured_hour in time_periods):
+                day_periods[measured_hour] = get_period_data(t)
+                days[d] = day_periods
+    return(days)
 
 def get_cached_data(city_name):
     # leser json data fra fil 
@@ -177,9 +125,9 @@ def get_command(i):
         if not i:
             return(False)
         if i.lower() == "t":
-            return("t")
+            return(DAY_VIEW)
         if i.lower() == "w":
-            return("w")
+            return(WEEK_VIEW)
         else:
             print("Ugyldig valg bare [T] og [W] er gyldig")
             return(False)
@@ -187,7 +135,11 @@ def get_command(i):
 def get_coordinates(city_name):
     city_coordinates = cities[city_name] 
     return(city_coordinates)
-    
+
+def get_date(d):
+    tomorrow = date.today() + timedelta(days=d)
+    return(tomorrow)
+
 def get_file_date(city_name):
     # Get the last modification time
     file_path = f"cache\\{city_name}.json"
@@ -215,6 +167,15 @@ def get_forecast_data(city_name):
         forecast_data = get_forecast(city_name)
         print("expired")
     return(forecast_data)
+
+def get_period_data(period_data):
+    period = {}
+    if "next_6_hours" in period_data["data"]:
+        maximum_temp = period_data["data"].get("next_6_hours").get("details").get("air_temperature_max")
+        minimum_temp = period_data["data"].get("next_6_hours").get("details").get("air_temperature_min")
+        a = round((maximum_temp + minimum_temp) / 2, 1)
+        period = dict(max_temp = maximum_temp, min_temp = minimum_temp, average = a)
+    return(period)
 
 def get_seven_dates(tomorrow):
     # lager en liste med syv datoer
@@ -244,7 +205,7 @@ def met_api_get(url):
     return(data)
     
 def print_temperatures(temperatures : dict, mode):
-    if mode == "t": 
+    if mode == DAY_VIEW: 
         # Print nice dict
         for f in temperatures:
             f["time"] = f["time"].replace("T", " KL: ")
@@ -257,23 +218,9 @@ def print_temperatures(temperatures : dict, mode):
             # using f str to set up the output
             tabel = f"{time_for_display} {measured_temp:>8} grader"
             print(tabel)
-    if mode == "w":
-        element = 0
-        d = 1
-        tommorow = date.today() + timedelta(days=d)
-        comp_times = get_seven_dates(tommorow)
-        comp_time = comp_times[element]
-        for f in temperatures:
-            measured_time = f["time"]
-            measured_date = date.fromisoformat(measured_time[0:10])
-            element += 1
-            print(element)
-            if measured_date == comp_time:
-                print(tommorow)
-                print("")
-                
-                d += 1
-        print(d)
+    if mode == WEEK_VIEW:
+        pass
+        
 
 def show_cities(city_list):
     for x, y in enumerate(city_list, start = 1):
