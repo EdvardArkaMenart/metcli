@@ -1,7 +1,7 @@
 import json
 import urllib3
 from datetime import date, timedelta
-from lib import get_cached_data, prep_data3
+from lib import get_cached_data, get_date, filter_temperatures7d
 
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=62.47&lon=6.14"
 #url = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&lon=-68.166667"
@@ -11,8 +11,8 @@ from lib import get_cached_data, prep_data3
 #print(json.dumps(json_data, indent=4))
 
 json_data = get_cached_data("bergen")
-tommorow = date.today() + timedelta(days=1)
-test = prep_data3(json_data)
+#tommorow = date.today() + timedelta(days=1)
+test = filter_temperatures7d(json_data)
 #test = json.loads(json_data)
 print(json.dumps(test, indent=4))
 
@@ -31,3 +31,4 @@ print(json.dumps(test, indent=4))
     #print(d)
 
 
+#print(get_date(-1))

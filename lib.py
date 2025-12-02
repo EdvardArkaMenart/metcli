@@ -6,7 +6,7 @@
 import json
 import urllib3
 import os
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
 DAY_VIEW = 1
 WEEK_VIEW = 2
@@ -80,7 +80,7 @@ def filter_temperatures7d(forecast_data):
             current_date = measured_time[0:10]
             measured_hour = measured_time[11:13]
             # tar ut riktige time perioder
-            if (d == current_date) and (date.fromisoformat(current_date) in seven_dates) and (measured_hour in time_periods):
+            if (d == current_date) and (measured_hour in time_periods):
                 day_periods[measured_hour] = get_period_data(t)
                 days[d] = day_periods
     return(days)
@@ -219,8 +219,31 @@ def print_temperatures(temperatures : dict, mode):
             tabel = f"{time_for_display} {measured_temp:>8} grader"
             print(tabel)
     if mode == WEEK_VIEW:
-        pass
-        
+        for s in range(1, 8):
+            day = get_date(s)
+            get_graph(temperatures, day)
+            
+
+def get_graph(temperatures, day):
+    time_periods = ["00", "06", "12", "18"]
+    day_averages = []
+    day_str = str(day)
+    month = day.strftime("%B")
+    display_day = day.strftime("%A")
+    day_of_month = day.strftime("%d")
+    year = day.strftime("%Y")
+    for t in temperatures.keys():
+        if t == day_str:
+            for a in time_periods:
+                day_averages.append(temperatures[day_str].get(a).get("average"))
+            day_average_sum = sum(day_averages)
+            day_average = round(day_average_sum / 4)
+            print(f"{display_day} {day_of_month}. {month} {year} (snittemperatur {day_average} grader)")
+            print(day_averages)
+            print("")
+
+
+    
 
 def show_cities(city_list):
     for x, y in enumerate(city_list, start = 1):
