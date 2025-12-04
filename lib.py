@@ -6,6 +6,7 @@
 import json
 import urllib3
 import os
+import math
 from datetime import timedelta, date, datetime
 
 DAY_VIEW = 1
@@ -162,10 +163,10 @@ def get_forecast_data(city_name):
     # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
         forecast_data = get_cached_data(city_name)
-        print("up to date")
+        #print("up to date")
     else:
         forecast_data = get_forecast(city_name)
-        print("expired")
+        #print("expired")
     return(forecast_data)
 
 def get_period_data(period_data):
@@ -203,7 +204,36 @@ def met_api_get(url):
     json_data = json.loads(api_response.data.decode("utf-8"))
     data = json.dumps(json_data)
     return(data)
-    
+
+def print_graph(temperatures, day):
+    # printer tabellen for dagen
+    time_periods = ["00", "06", "12", "18"]
+    day_averages = []
+    day_max = []
+    day_min = []
+    day_str = str(day)
+    month = day.strftime("%B")
+    display_day = day.strftime("%A")
+    day_of_month = day.strftime("%d")
+    year = day.strftime("%Y")
+    for t in temperatures.keys():
+        # bruker dataen til den relevante datoen
+        if t == day_str:
+            for p in time_periods:
+                day_averages.append(temperatures[day_str].get(p).get("average"))
+                maxi = temperatures[day_str].get(p).get("max_temp")
+                day_max.append(math.ceil(maxi))
+                mini = temperatures[day_str].get(p).get("min_temp")
+                day_min.append(math.floor(mini))
+            day_average_sum = sum(day_averages)
+            day_average = round(day_average_sum / 4)
+            print(f"{display_day.capitalize()} {day_of_month}. {month} {year} (snittemperatur {day_average} grader)")
+            print(f"00-06: fra {day_min[0]:.0f} til {day_max[0]:.0f} grader (snittemperatur {day_averages[0]:.1f} grader)")
+            print(f"06-12: fra {day_min[1]:.0f} til {day_max[1]:.0f} grader (snittemperatur {day_averages[1]:.1f} grader)")
+            print(f"12-18: fra {day_min[2]:.0f} til {day_max[2]:.0f} grader (snittemperatur {day_averages[2]:.1f} grader)")
+            print(f"18-00: fra {day_min[3]:.0f} til {day_max[3]:.0f} grader (snittemperatur {day_averages[3]:.1f} grader)")
+            print("")
+
 def print_temperatures(temperatures : dict, mode):
     if mode == DAY_VIEW: 
         # Print nice dict
@@ -219,31 +249,10 @@ def print_temperatures(temperatures : dict, mode):
             tabel = f"{time_for_display} {measured_temp:>8} grader"
             print(tabel)
     if mode == WEEK_VIEW:
+        # loop gjennom 7 dager
         for s in range(1, 8):
             day = get_date(s)
-            get_graph(temperatures, day)
-            
-
-def get_graph(temperatures, day):
-    time_periods = ["00", "06", "12", "18"]
-    day_averages = []
-    day_str = str(day)
-    month = day.strftime("%B")
-    display_day = day.strftime("%A")
-    day_of_month = day.strftime("%d")
-    year = day.strftime("%Y")
-    for t in temperatures.keys():
-        if t == day_str:
-            for a in time_periods:
-                day_averages.append(temperatures[day_str].get(a).get("average"))
-            day_average_sum = sum(day_averages)
-            day_average = round(day_average_sum / 4)
-            print(f"{display_day} {day_of_month}. {month} {year} (snittemperatur {day_average} grader)")
-            print(day_averages)
-            print("")
-
-
-    
+            print_graph(temperatures, day)
 
 def show_cities(city_list):
     for x, y in enumerate(city_list, start = 1):

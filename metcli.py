@@ -2,6 +2,7 @@
 # Filtrere data
 # Vis datasett
 
+import locale
 from datetime import timedelta, date
 from lib import *
 
@@ -11,7 +12,19 @@ city_list = make_city_list()
 DAY_VIEW = 1
 WEEK_VIEW = 2
 show_cities(city_list)
- 
+
+# gjør datime objektene til norsk bokmål
+try:
+    locale.setlocale(locale.LC_ALL, 'nb_NO.utf8')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'nb_NO')
+    except locale.Error:
+        try:
+            locale.setlocale(locale.LC_ALL, 'Norwegian_Norway.1252')
+        except locale.Error:
+            pass
+
 # main loop
 while True:
     # velg by  
@@ -39,7 +52,7 @@ while True:
         if coordinates:
             forecast_data = get_forecast_data(city_name)
             temperatures = filter_temperatures1d(forecast_data)
-            print("temperatur for", city_name,"den", tomorrow.strftime("%d, %m, %Y"))
+            print("Temperatur for", city_name.capitalize(),"den", tomorrow.strftime("%d, %m, %Y"))
             print_temperatures(temperatures, mode)
     # viser værdata for syv dager
     if mode == WEEK_VIEW:
