@@ -36,6 +36,9 @@ cities = {
 }
 
 def filter_temperatures1d(forecast_data):
+    weather_variabels = False
+    while weather_variabels is False:
+        weather_variabels = get_command("variabeler")
     temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
@@ -121,6 +124,26 @@ def get_command(i):
             except ValueError:
                 print("ugyldig valg du må skrive ett tall fra listen")
                 return(False)
+    if i == "variabeler":
+        variabel_list = 1, 2, 3
+        print("1 for temperatur, 2 for nedbør og 3 for vind, bruk mellomrom")
+        try:
+            i = [int(x) for x in input().split()]
+        except ValueError:
+            print("ugyldig valg du må skrive ett tall")
+            return(False)
+        if not i:
+            return(False)
+        else:
+            print(i)
+            try:
+                print("worked")
+                return not set(i).isdisjoint(variabel_list)
+            except:
+                print("failed")
+                return(False)
+            
+                
     if i:
         i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
         if not i:
