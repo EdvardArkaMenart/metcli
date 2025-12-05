@@ -11,6 +11,9 @@ from datetime import timedelta, date, datetime
 
 DAY_VIEW = 1
 WEEK_VIEW = 2
+TEMP = 1
+PRECIPITATION = 2
+WIND_SPEED = 3
 
 cities = {
     "arendal": (58.46, 8.77),
@@ -35,10 +38,10 @@ cities = {
     "ålesund": (62.47, 6.14)
 }
 
+def dump_dict(h: dict):
+    print(json.dumps(h, indent=4))
+
 def filter_temperatures1d(forecast_data):
-    weather_variabels = False
-    while weather_variabels is False:
-        weather_variabels = get_command("variabeler")
     temperatures = []
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
@@ -52,8 +55,11 @@ def filter_temperatures1d(forecast_data):
         measured_date = date.fromisoformat(measured_time[0:10])
         # sammenligne dato fra måling med dato for i morgen
         if  measured_date == tomorrow:
+            if "next_6_hours" in t["data"]:
+                precipitation = t["data"].get("next_6_hours").get("details").get("precipitation_amount")
+            wind_speed = t["data"].get("instant").get("details").get("wind_speed")
             measured_temperature = t["data"].get("instant").get("details").get("air_temperature")
-            d = dict(time =  measured_time, temp = measured_temperature)
+            d = dict(time = measured_time, temp = measured_temperature, wind_speed = wind_speed, precipitation = precipitation)
             temperatures.append((d))
     return(temperatures)
 
@@ -124,8 +130,8 @@ def get_command(i):
             except ValueError:
                 print("ugyldig valg du må skrive ett tall fra listen")
                 return(False)
-    if i == "variabeler":
-        variabel_list = 1, 2, 3
+    if i == "variabler":
+        parameter_list = [1, 2, 3]
         print("1 for temperatur, 2 for nedbør og 3 for vind, bruk mellomrom")
         try:
             i = [int(x) for x in input().split()]
@@ -134,16 +140,11 @@ def get_command(i):
             return(False)
         if not i:
             return(False)
-        else:
-            print(i)
-            try:
-                print("worked")
-                return not set(i).isdisjoint(variabel_list)
-            except:
-                print("failed")
+        else:   
+            if set(i).isdisjoint(parameter_list):
                 return(False)
-            
-                
+            else:
+                return(i)                    
     if i:
         i = input("[T] for vær i morgen. [W] for 7 dager fra og med i morgen:")
         if not i:
@@ -257,19 +258,35 @@ def print_graph(temperatures, day):
             print(f"18-00: fra {day_min[3]:.0f} til {day_max[3]:.0f} grader (snittemperatur {day_averages[3]:.1f} grader)")
             print("")
 
-def print_temperatures(temperatures : dict, mode):
+def print_temperatures(temperatures : dict, mode, params):
     if mode == DAY_VIEW: 
         # Print nice dict
         for f in temperatures:
+            mm = ""
+            p_txt = ""
+            w_txt = ""
+            m_txt = ""
+            measured_temp = ""
+            wind_speed = "" 
+            precipitation = ""
             f["time"] = f["time"].replace("T", " KL: ")
             f["time"] = f["time"].replace("00Z", "")
             num_chars_to_remove = 10
             # Using string slicing
             time_for_display = f["time"][num_chars_to_remove:]
-            # converting measured_temp from float to string
-            measured_temp = str(f["temp"])
+            if TEMP in params:
+                # converting measured_temp from float to string
+                measured_temp = str(f["temp"])
+                m_txt = " grader"
+            if WIND_SPEED in params:
+                wind_speed = str(f["wind_speed"])
+                w_txt = " regn"
+                mm = "mm"
+            if PRECIPITATION in params:
+                precipitation = str(f["precipitation"])
+                p_txt = " m/s"
             # using f str to set up the output
-            tabel = f"{time_for_display} {measured_temp:>8} grader"
+            tabel = f"{time_for_display}{measured_temp:>4}{m_txt}{wind_speed:>4}{mm}{w_txt}{precipitation:>4}{p_txt}"
             print(tabel)
     if mode == WEEK_VIEW:
         # loop gjennom 7 dager

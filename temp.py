@@ -10,16 +10,16 @@ from lib import get_cached_data, get_date, filter_temperatures7d
 #json_data = json.loads(api_response.data.decode("utf-8"))
 #print(json.dumps(json_data, indent=4))
 
-#json_data = get_cached_data("bergen")
+json_data = get_cached_data("bergen")
 #tommorow = date.today() + timedelta(days=1)
 #test = filter_temperatures7d(json_data)
-#test = json.loads(json_data)
-#print(json.dumps(test, indent=4))
+test = json.loads(json_data)
+print(json.dumps(test, indent=4))
 
 # Taking multiple integer inputs into a list
-numbers = [int(x) for x in input("Enter multiple numbers (separated by spaces): ").split()]
-print(f"Numbers entered: {numbers}")
-print(f"Sum of numbers: {sum(numbers)}")
+#numbers = [int(x) for x in input("Enter multiple numbers (separated by spaces): ").split()]
+#print(f"Numbers entered: {numbers}")
+#print(f"Sum of numbers: {sum(numbers)}")
 
 #def get_dates_seven_days_from_date(start_date):
     #date_list = []

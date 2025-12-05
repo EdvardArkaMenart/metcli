@@ -27,6 +27,7 @@ except locale.Error:
 
 # main loop
 while True:
+    weather_variables = False
     # velg by  
     i = None
     command = get_command(i)
@@ -48,15 +49,17 @@ while True:
     coordinates = get_coordinates(city_name)   
     # viser værdata for i morgen 
     if mode == DAY_VIEW:
+        while weather_variables is False:
+            weather_variables = get_command("variabler")
         # sjekk om man har gyldig koordinater
         if coordinates:
             forecast_data = get_forecast_data(city_name)
-            temperatures = filter_temperatures1d(forecast_data)
+            temperatures = filter_temperatures1d(forecast_data)   
             print("Temperatur for", city_name.capitalize(),"den", tomorrow.strftime("%d, %m, %Y"))
-            print_temperatures(temperatures, mode)
+            print_temperatures(temperatures, mode, weather_variables)
     # viser værdata for syv dager
     if mode == WEEK_VIEW:
         if coordinates:
             forecast_data = get_forecast_data(city_name)
             temperatures = filter_temperatures7d(forecast_data)
-            print_temperatures(temperatures, mode)
+            print_temperatures(temperatures, mode, weather_variables)
