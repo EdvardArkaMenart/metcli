@@ -14,6 +14,9 @@ WEEK_VIEW = 2
 TEMP = 1
 PRECIPITATION = 2
 WIND_SPEED = 3
+RESET = "\033[0m"
+RED = "\033[31m"
+time_periods = ["00", "06", "12", "18"]
 
 cities = {
     "arendal": (58.46, 8.77),
@@ -65,7 +68,6 @@ def filter_temperatures1d(forecast_data):
 
 def filter_temperatures7d(forecast_data):  
     days = {}
-    time_periods = ["00", "06", "12", "18"]
     # henter timeseries array
     timeseries = json.loads(forecast_data).get("properties").get("timeseries")
     # set up datetime variables
@@ -128,15 +130,15 @@ def get_command(i):
                 city_index = str(i)
                 return(city_index)
             except ValueError:
-                print("ugyldig valg du må skrive ett tall fra listen")
+                print("Ugyldig valg: du må skrive ett tall fra listen")
                 return(False)
     if i == "variabler":
         parameter_list = [1, 2, 3]
-        print("1 for temperatur, 2 for nedbør og 3 for vind, bruk mellomrom")
+        print("Angi ønskede felter (1. temperatur, 2. vind, 3. nedbør) eks: 1 2 3: ")
         try:
             i = [int(x) for x in input().split()]
         except ValueError:
-            print("ugyldig valg du må skrive ett tall")
+            print("Ugyldig valg: felter må angis som en liste separert med mellomrom")
             return(False)
         if not i:
             return(False)
@@ -154,7 +156,7 @@ def get_command(i):
         if i.lower() == "w":
             return(WEEK_VIEW)
         else:
-            print("Ugyldig valg bare [T] og [W] er gyldig")
+            print("Ugyldig valg: bare [T] og [W] er gyldig")
             return(False)
         
 def get_coordinates(city_name):
@@ -187,10 +189,8 @@ def get_forecast_data(city_name):
     # Valider cache, last ned nye data hvis cache er invalid
     if validate_cache(city_name):
         forecast_data = get_cached_data(city_name)
-        #print("up to date")
     else:
         forecast_data = get_forecast(city_name)
-        #print("expired")
     return(forecast_data)
 
 def get_period_data(period_data):
@@ -231,7 +231,6 @@ def met_api_get(url):
 
 def print_graph(temperatures, day):
     # printer tabellen for dagen
-    time_periods = ["00", "06", "12", "18"]
     day_averages = []
     day_max = []
     day_min = []
@@ -269,7 +268,7 @@ def print_temperatures(temperatures : dict, mode, params):
             measured_temp = ""
             wind_speed = "" 
             precipitation = ""
-            f["time"] = f["time"].replace("T", " KL: ")
+            f["time"] = f["time"].replace("T", "")
             f["time"] = f["time"].replace("00Z", "")
             num_chars_to_remove = 10
             # Using string slicing
@@ -286,7 +285,7 @@ def print_temperatures(temperatures : dict, mode, params):
                 precipitation = str(f["precipitation"])
                 p_txt = " m/s"
             # using f str to set up the output
-            tabel = f"{time_for_display}{measured_temp:>4}{m_txt}{wind_speed:>4}{mm}{w_txt}{precipitation:>4}{p_txt}"
+            tabel = f"KL {RED}{time_for_display}{measured_temp:>4}{RESET}{m_txt}{RED}{wind_speed:>4}{mm}{RESET}{w_txt}{RED}{precipitation:>4}{RESET}{p_txt}"
             print(tabel)
     if mode == WEEK_VIEW:
         # loop gjennom 7 dager
